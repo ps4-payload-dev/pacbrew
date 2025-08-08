@@ -1,0 +1,36 @@
+pkgname=ps4-payload-bzip2
+pkgver=1.0.8
+pkgrel=1
+pkgdesc="A high-quality data compression program"
+arch=('any')
+license=('BSD')
+url='https://sourceware.org/bzip2'
+options=(!strip libtool staticlibs)
+source=(https://sourceware.org/pub/bzip2/bzip2-$pkgver.tar.gz)
+sha256sums=('ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269')
+groups=('ps4-payload-dev')
+makedepends=('ps4-payload-sdk')
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+}
+
+build() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd bzip2-$pkgver
+
+    ${MAKE} libbz2.a bzip2 bzip2recover \
+	    CC=${CC} AR=${AR} RANLIB=${RANLIB}
+}
+
+package() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd bzip2-$pkgver
+
+    install -Dm 644 bzlib.h -t "${pkgdir}/${DESTDIR}/${PREFIX}/include"
+    install -Dm 644 libbz2.a -t "${pkgdir}/${DESTDIR}/${PREFIX}/lib"
+    install -Dm 755 bzip2 -t "${pkgdir}/${DESTDIR}/${PREFIX}/bin"
+    install -Dm 755 bzip2recover -t "${pkgdir}/${DESTDIR}/${PREFIX}/bin"
+}

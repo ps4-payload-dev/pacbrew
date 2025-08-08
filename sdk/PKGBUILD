@@ -1,0 +1,30 @@
+pkgname=ps4-payload-sdk
+pkgver=git
+pkgrel=1
+pkgdesc="An SDK for PS4 payloads that uses dynamic linking"
+arch=('any')
+license=('GPLv3')
+url="https://github.com/ps4-payload-dev/sdk"
+source=("git+https://github.com/ps4-payload-dev/sdk.git")
+sha256sums=('SKIP')
+groups=('ps4-payload-dev')
+options=(!strip libtool staticlibs)
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+}
+
+pkgver() {
+    cd sdk
+    git describe --tags --long | sed 's/^[^0-9]*//; s/\([^-]*-g\)/r\1/; s/-/./g'
+}
+
+build() {
+    make -C sdk
+}
+
+package() {
+    make -C sdk install DESTDIR="${pkgdir}/${PS4_PAYLOAD_SDK}"
+}

@@ -1,0 +1,41 @@
+pkgname=ps4-payload-openlibm
+pkgver=0.8.6
+pkgrel=1
+pkgdesc='Standalone implementation of C mathematical functions'
+arch=('any')
+url='https://openlibm.org/'
+license=('MIT')
+options=(!strip libtool staticlibs)
+source=("https://github.com/JuliaMath/openlibm/archive/refs/tags/v$pkgver.tar.gz")
+sha256sums=('347998968cfeb2f9b91de6a8e85d2ba92dec0915d53500a4bc483e056f85b94c')
+groups=('ps4-payload-dev')
+makedepends=('ps4-payload-sdk')
+
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+}
+
+build() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd openlibm-$pkgver
+
+    ${CMAKE} -DCMAKE_BUILD_TYPE=Release \
+	     -DCMAKE_INSTALL_LIBDIR="/user/homebrew/lib" \
+	     -B build \
+             -S .
+    ${MAKE} -C build
+}
+
+package() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd openlibm-$pkgver
+
+    export DESTDIR="${pkgdir}/${DESTDIR}"
+    ${MAKE} -C build install
+
+    ln -s libopenlibm.a \
+       "${pkgdir}/${PS4_PAYLOAD_SDK}/target/user/homebrew/lib/libm.a"
+}

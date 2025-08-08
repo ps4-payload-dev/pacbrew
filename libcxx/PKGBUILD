@@ -1,0 +1,56 @@
+pkgname=ps4-payload-libcxx
+pkgver=15.0.7
+pkgrel=1
+pkgdesc='LLVM C++ Standard Library'
+arch=('any')
+url='https://libcxx.llvm.org'
+license=('Apache2')
+options=(!strip libtool staticlibs)
+source=("https://github.com/llvm/llvm-project/releases/download/llvmorg-${pkgver}/llvm-project-${pkgver}.src.tar.xz")
+sha256sums=('8b5fcb24b4128cf04df1b0b9410ce8b1a729cb3c544e6da885d234280dedeac6')
+groups=('ps4-payload-dev')
+makedepends=('ps4-payload-sdk')
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+}
+
+build() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd llvm-project-$pkgver.src
+
+    ${CMAKE} -S runtimes -B build \
+	     -DCMAKE_INSTALL_PREFIX="${PS4_PAYLOAD_SDK}/target" \
+	     -DCMAKE_BUILD_TYPE=Release \
+	     -DCMAKE_CXX_FLAGS="-nostdlib++" \
+	     -DLLVM_ENABLE_RUNTIMES="libunwind;libcxxabi;libcxx" \
+	     -DLIBCXX_ENABLE_STATIC=YES \
+	     -DLIBCXX_ENABLE_RTTI=YES \
+	     -DLIBCXX_ENABLE_EXCEPTIONS=YES \
+	     -DLIBCXX_ENABLE_THREADS=YES \
+	     -DLIBCXX_ENABLE_SHARED=NO \
+	     -DLIBCXX_ENABLE_ABI_LINKER_SCRIPT=NO \
+	     -DLIBCXX_CXX_ABI=libcxxabi \
+	     -DLIBCXXABI_ENABLE_STATIC=YES \
+	     -DLIBCXXABI_ENABLE_EXCEPTIONS=YES \
+	     -DLIBCXXABI_ENABLE_THREADS=YES \
+	     -DLIBCXXABI_USE_LLVM_UNWINDER=YES \
+	     -DLIBCXXABI_ENABLE_SHARED=NO \
+	     -DLIBCXXABI_USE_COMPILER_RT=NO \
+	     -DLIBCXXABI_HAS_CXA_THREAD_ATEXIT_IMPL=NO \
+	     -DLIBUNWIND_ENABLE_STATIC=YES \
+	     -DLIBUNWIND_ENABLE_THREADS=YES \
+	     -DLIBUNWIND_IS_BAREMETAL=YES \
+	     -DLIBUNWIND_ENABLE_SHARED=NO \
+	     -DLIBUNWIND_USE_COMPILER_RT=NO
+    ${MAKE} -C build
+}
+
+package() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd llvm-project-$pkgver.src
+
+    ${MAKE} -C build install DESTDIR="${pkgdir}"
+}
