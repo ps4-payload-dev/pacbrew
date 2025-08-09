@@ -3,8 +3,7 @@
 PKGS=(sdk openlibm libcxx fast_float
       bzip2 zlib xz zstd
       libressl
-      libpsl
-      curl)
+      libpsl curl asio)
 
 sudo pacman --noconfirm --remove ps4-payload-dev
 
