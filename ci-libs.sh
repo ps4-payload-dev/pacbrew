@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 PKGS=(sdk openlibm libcxx fast_float
-      bzip2 zlib xz zstd
+      bzip2 zlib xz zstd libdeflate libb64
+      libevent
+      miniupnpc
       openssl
       libpsl curl asio)
 
