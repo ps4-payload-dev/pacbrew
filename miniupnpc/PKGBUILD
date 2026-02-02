@@ -1,0 +1,37 @@
+pkgname=ps4-payload-miniupnpc
+pkgver=2.2.4
+pkgrel=1
+pkgdesc='Small UPnP client library/tool to access Internet Gateway Devices'
+url='https://miniupnp.tuxfamily.org/'
+arch=('any')
+license=('BSD')
+options=(!strip libtool staticlibs)
+source=(https://miniupnp.tuxfamily.org/files/miniupnpc-${pkgver}.tar.gz)
+sha256sums=('SKIP')
+groups=('ps4-payload-dev')
+makedepends=('ps4-payload-sdk')
+
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+    cd miniupnpc-${pkgver}
+    sed -i 's|$(shell $(CC) -dumpmachine)|x86_64-pc-freebsd|g' Makefile
+}
+
+build() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd miniupnpc-${pkgver}
+
+    export INSTALLPREFIX="${PREFIX}"
+    ${MAKE} build/libminiupnpc.a build/miniupnpc.pc
+}
+
+package() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd miniupnpc-$pkgver
+
+    export DESTDIR="${pkgdir}/${DESTDIR}"
+    ${MAKE} install OS=amiga # :D
+}
