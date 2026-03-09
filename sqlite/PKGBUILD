@@ -1,0 +1,40 @@
+pkgname=ps4-payload-sqlite
+pkgver=3.46.1
+pkgrel=1
+pkgdesc="A C library that implements an SQL database engine"
+arch=('any')
+license=('LicenseRef-Sqlite')
+url="https://www.sqlite.org/"
+options=(!strip libtool staticlibs)
+source=(https://www.sqlite.org/2024/sqlite-src-3460100.zip)
+sha256sums=('SKIP')
+
+groups=('ps4-payload-dev')
+
+prepare() {
+    if [ -z "${PS4_PAYLOAD_SDK}" ]; then
+	export PS4_PAYLOAD_SDK=/opt/ps4-payload-sdk
+    fi
+}
+
+build() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd sqlite-src-3460100
+
+    ./configure --prefix="${PREFIX}" --host=x86_64-pc-freebsd \
+		--enable-static --disable-shared
+    ${MAKE} sqlite3.h libsqlite3.la
+}
+
+
+package() {
+    source "${PS4_PAYLOAD_SDK}/toolchain/orbis.sh"
+    cd sqlite-src-3460100
+
+    export DESTDIR="${pkgdir}/${DESTDIR}"
+    make lib_install
+    install -d "${DESTDIR}/${PREFIX}/include/"
+    install -m 0644 sqlite3.h "${DESTDIR}/${PREFIX}/include/"
+
+    ${PS4_CROSS_FIX_ROOT} "${DESTDIR}/${PREFIX}"
+}

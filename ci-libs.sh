@@ -5,6 +5,7 @@ PKGS=(sdk openlibm libcxx fast_float
       libevent
       miniupnpc
       openssl
+      sqlite
       libpsl curl asio)
 
 sudo pacman --noconfirm --remove ps4-payload-dev
