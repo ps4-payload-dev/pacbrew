@@ -22,6 +22,8 @@ pkgver() {
 }
 
 build() {
+	# for sqlite3
+	sed -i '/^__BEGIN_DECLS/a int fdatasync(int);' sdk/include/freebsd-9.3/unistd.h
     make -C sdk
 }
 
